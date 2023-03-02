@@ -1,13 +1,11 @@
-# Laboratório 01 - Roteiro 01
+# Laboratório 01 - Instalação das ferramentas de desenvolvimento - Ubuntu 20.04
 
 ## 1 - Objetivos
 
+Configurar o Ubuntu 20.04 no Windows Subsystem for Linux 2 (WSL2) como sistema
+para desenvolvimento de firmware para microcontroladores da família STM32.
+Nesta aula iremos instalar
 
-Instalar e configurar o Ubuntu 20.04 no Windows Subsystem for Linux 2 (WSL2) como sistema
-para desenvolvimento de firmware para microcontroladores da família STM32. Nesta aula
-aprenderemos a instalar
-
-* Windows Subsystem for Linux 2;
 * GCC - GNU C Compiler;
 * GCC ARM Toolchain;
 * OpenOCD - Open On Chip Debugger;
@@ -16,24 +14,11 @@ aprenderemos a instalar
 
 ## 2 - Pré-requisitos
 
-* Windows 10 versão 2004 ou superior;
+* Ubuntu 20.04;
 * Conhecimento básico da utilização de sistemas Linux;
 * ST-LINK *in-circuit debugger and programmer*.
 
-Este documento assume que você esteja utilizando o Windows 10 versão 2004 ou superior
-(Build 19041 ou superior) ou o Windows 11. Caso esteja utilizando uma versão mais antiga
-do Windows 10 é recomendavél que você faça a atualização. Caso não seja possível você 
-ainda poderá instalar o WSL, consulte a referência [3].
-
 ## 3 - Referências
-
-[1] [Instalar o WSL no Windows 10 2004 e superior](https://docs.microsoft.com/pt-br/windows/wsl/install)
-
-[2] [Conectar dispositivos USB ao WSL](https://devblogs.microsoft.com/commandline/connecting-usb-devices-to-wsl/)
-
-[3] [Instalar o WSL no Windows 10 em versões mais antigas](https://docs.microsoft.com/pt-br/windows/wsl/install-manual)
-
-[4] [Configurar um ambiente de desenvolvimento WSL](https://docs.microsoft.com/pt-br/windows/wsl/setup/environment)
 
 [5] [GCC online documentation](https://gcc.gnu.org/onlinedocs/)
 
@@ -41,134 +26,7 @@ ainda poderá instalar o WSL, consulte a referência [3].
 
 [7] [Git](https://git-scm.com/)
 
-## 4 - Introdução
-
-Quando se trata de desenvolvimento de softwares para computadores geralmente
-podemos utilizar qualquer máquina que possua a mesma arquitetura e execute o
-mesmo sistema operacional. Este tipo de desenvolvimento é chamado de 
-**desenvolvimento nativo**.
-
-Entretanto, a grande maioria dos sistemas embarcados utilizam arquiteturas
-diferentes das arquiteturas utilizadas em computadores. Além disso, estes 
-dispositivos geralmente possuem recursos como memória, capacidade de
-processamento, etc, bastante limitados. Frequentemente não suportam ou não
-utilizam sistemas operacionais, não tem dispositivos de entrada e saída como
-teclados, mouses e monitores. Enfim, não é possível a utilização destes
-dispositivos para desenvolvimento de software.
-
-Para desenvolver softwares para sistemas embarcados utilizamos um computador
-executando um sistema operacional qualquer (Windows, Linux, MacOS) e, por meio
-de um pacote de software especializado, compilamos o sotware para a arquitetura
-desejada. Este tipo de desenvolvimento é chamado de **cross-platform** e o
-processo de compilação é chamado de **cross-compilation**. O pacote de software
-utilzado é chamado de **cross-toolchain**, ou apenas **toolchain**. A máquina
-onde desenvolvemos a aplicação é chamada de **host** e o dispositivo que irá
-executar o binário é chamado de **target**.
-
-Ao longo do nosso curso desenvolveremos softwares que serão executados em
-dispositivos, **targets**, com arquitetura **ARM Cortex-M** e utilizaremos como
-**host** uma máquina com arquitetura **x86** executando um sistema operacional
-Windows, Linux ou MacOS. O pacote de software, **toolchain**, utilizado para
-gerar o binário para a arquitetura **ARM Cortex-M** será o
-**GCC ARM Toolchain**.
-
-Após compilar o programa você terá uma imagem do binário executável no seu
-computador, ainda é necessário uma forma de carregar e executar esta imagem no
-sistema embarcado. A imagem do arquivo binário normalmente é carregada em uma
-memória na placa do dispositivo ou em uma memória integrada ao microcontrolador.
-
-
-## 5 - Instalação do WSL
-
-Para o Windows 10 versão 2004 e superiores o processo de instalação do WSL é
-realizado de forma automática. Para isso, abra o *Windows PowerShell* como
-administrador.
-
-![Windows PowerShell](./images/ps-administrador.jpg "Windows PowerShell")
-
-O WSL permite que você escolha, entre as opções disponíveis, a distribuição
-Linux de sua preferência. Para ver uma lista das distribuições disponíveis
-digite o comando 
-
-```console
-PS > wsl --list --online
-```
-
-![Windows PowerShell](./images/ps-distros.jpg "Windows PowerShell")
-
-Em seguida, instale a distribuição desejada usando **wsl --install -d <Distro>**.
-Neste curso será utilizada a distribuição **Ubuntu 20.04 LTS**. Caso opte por
-uma distribuição diferente será necessário adaptar as instruções fornecidas.
-
-```console
-PS > wsl --install -d Ubuntu-20.04
-```
-Quando a instalação terminar será solicitado que você escolha um nome de
-usuário e uma senha para este usuário. ATENÇÃO, **não será mostrado **
-**nenhum caractere ao digitar a senha**. É assim mesmo, digite a senha e
-pressione a tecla *ENTER*.
-
-É boa prática manter o sistema operacional atualizado. Para temos que
-atualizar a lista de pacotes, baixar e instalar as atualizações dos
-programas instalados. Para realizar esta tarefa iremos utilizar o **apt**
-(*Advanced Packaging Tool*), gerenciador de pacotes do Ubuntu.
-
-Os sistemas operacionais baseados no Unix, dos quais o Linux faz parte, têm a
-capacidade de definir de forma detalhada os direitos de acesso aos arquivos,
-dispositivos e recursos do sistema operacional. Para atualizar o sistema é
-necessário direitos de super-usuário (administrador).
-
-Para executar programas e comandos com direitos de acesso de super-usuário
-podemos utilizar o comando **sudo**, que significa *super user do!*. As linhas
-de comando a seguir atualizam a lista de pacotes e atualizam os programas
-instalados:
-
-```console
-foo@bar$ sudo apt update
-foo@bar$ sudo apt upgrade
-```
-
-O *apt* executa com direitos de acesso de super-usuário logo será solicitada
-a senha de administrador, criada logo após o a instalação do Ubuntu.
-
-Antes de iniciarmos a instalação das ferramentas necessárias para configuração
-do ambiente de desenvolvimento vamos criar um diretório para salvarmos os
-arquivos que baixarmos da internet e outro que servirá de espaço de trabalho
-para atividades de laboratório.
-
-```console
-foo@bar$ cd
-foo@bar$ mkdir Downloads
-foo@bar$ mkdir semb1-workspace
-```
-
-O comando **cd** (*Change Directory*) é utilizado para alterar o diretório
-atual. Quando utilizado sem parâmetros o diretório é alterado para a pasta
-*home* do usuário. A pasta *home* é o local onde você pode armazenar seus
-arquivos pessoais no Linux. Geralmente o diretório *home* possui o caminho
-***/home/usuario***. Você pode consultar o caminho do diretório atual
-utilizando o comando **pwd**.
-
-O comando **mkdir** (*Make Directory*) é utilizado para criar novos diretórios.
-Os comando acima criaram os diretórios ***/home/usuario/Downloads*** e 
-***/home/usuario/semb1-workspace***. Utilizaremos o diretório Downloads para
-salvar arquivos e programas baixados da internet e o diretório semb1-workspace
-para nossas atividades de laboratório.
-
-### 5.1 Acesso do sistema de arquivos do Linux no Windows Explorer
-
-Em algumas situações pode ser necessário acessar algum arquivo do Linux 
-utilizando algum aplicativo Windows ou você queira explorar o sistema de
-arquivos Linux de forma gráfica. Para as situações como a descrita podemos
-montar o sistema de arquivos do Linux como um ***drive*** de rede.
-
-Para montar o sistema de arquivos do Linux abra uma nova janela do Windows
-Explorer e digite na barra de endereços ***\\\\wsl$***. Após pressionar a
-tecla **ENTER** você terá acesso ao sistema de arquivos do Linux.
-
-![Ubuntu terminal](./images/windows-wsl-mount.jpg "Ubuntu terminal")
-
-## 6 - Instalação do compilador e da ferramenta de controle de versões
+## 4 - Instalação do compilador e da ferramenta de controle de versões
 
 Agora, iremos instalar algumas ferramentas básicas que utilizaremos ao longo do
 nosso curso, o compilador *GCC - GNU C Compiler* e ferramenta de controle de
@@ -235,7 +93,7 @@ Maiores informações sobre o comando **ls** digite:
 foo@bar$ man ls
 ```
 
-## 7 - GCC ARM Toolchain
+## 5 - GCC ARM Toolchain
 
 Para instalar o **GCC ARM Toolchain** devemos ir até o website indicado na
 referência [6] e baixar o arquivo com uma versão pré-compilada do *toolchain*
@@ -286,9 +144,9 @@ foo@bar$ arm-none-eabi-gdb --version
 
 ![Ubuntu terminal](./images/ubuntu-toolchain-test.jpg "Ubuntu terminal")
 
-## 8 - Instalação das ferramentas de gravação e depuração de código
+## 6 - Instalação das ferramentas de gravação e depuração de código
 
-### 8.1 - Instalação do OpenOCD
+### 6.1 - Instalação do OpenOCD
 
 Para instalar o OpenOCD podemos utilizar o gerenciador de pacotes do Ubuntu,
 **apt**. Entretanto, a versão do OpenOCD que é instalada utilizando o **apt** é
@@ -379,7 +237,7 @@ foo@bar$ openocd --version
 
 ![Ubuntu terminal](./images/ubuntu-openocd-version.jpg "Ubuntu terminal")
 
-### 8.2 - Ferramentas de código aberto ST-LINK
+### 6.2 - Ferramentas de código aberto ST-LINK
 
 As ferramentas de código aberto ST-LINK também podem ser utilizadas para
 gravar e depurar programas desenvolvidos para dispositivos *STM32*. Iremos
@@ -479,7 +337,7 @@ foo@bar$ st-util --version
 
 ![Ubuntu terminal](./images/ubuntu-stlink-test.jpg "Ubuntu terminal")
 
-### 8.3 - Instalação do IDE Visual Studio Code
+## 7 - Instalação do IDE Visual Studio Code
 
 O **Visual Studio Code** (VS Code) é um Ambiente de Desenvolvimento Integrado
 (*Integrated Development Environment - IDE*) de código aberto desenvolvido
@@ -548,4 +406,3 @@ extensões instalaladas localmente. Selecione
 * **Cortex-Debug**.
 
 ![VS Code](./images/vscode-wsl-remote-extensions.jpg "VS Code")
-

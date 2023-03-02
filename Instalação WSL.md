@@ -1,28 +1,124 @@
-# Laboratório 01 - Roteiro 02
+#  Laboratório 01 - Instalação do Ubuntu 20.04 no Windows Subsystem for Linux 2 (WSL2)
 
 ## 1 - Objetivos
 
-Instalação de dispositivos USB no WSL2 e configuração da interface de 
-programação e depuração de código **ST-LINK**.
 
+Instalar e configurar o Ubuntu 20.04 no Windows Subsystem for Linux 2 (WSL2).
+
+* Windows Subsystem for Linux 2;
 
 ## 2 - Pré-requisitos
 
-* Windows Subsystem for Linux 2, versão do kernel 5.10.60.1 ou superior;
+* Windows 10 versão 2004 ou superior;
 * Conhecimento básico da utilização de sistemas Linux;
-* ST-LINK *in-circuit debugger and programmer*;
+
+Este documento assume que você esteja utilizando o Windows 10 versão 2004 ou
+superior (Build 19041 ou superior) ou o Windows 11. Caso esteja utilizando uma
+versão mais antiga do Windows 10 é recomendavél que você faça a atualização.
+Caso não seja possível você ainda poderá instalar o WSL, consulte a referência
+[2].
 
 ## 3 - Referências
 
-[1] [Conectar dispositivos USB ao WSL](https://devblogs.microsoft.com/commandline/connecting-usb-devices-to-wsl/)
+[1] [Instalar o WSL no Windows 10 2004 e superior](https://docs.microsoft.com/pt-br/windows/wsl/install)
 
-[2] [USBIPD-WIN](https://github.com/dorssel/usbipd-win/releases)
+[2] [Instalar o WSL no Windows 10 em versões mais antigas](https://docs.microsoft.com/pt-br/windows/wsl/install-manual)
 
-[3] [WSL 2: Connect USB devices](https://www.youtube.com/watch?v=I2jOuLU4o8E)
+[3] [Conectar dispositivos USB ao WSL](https://devblogs.microsoft.com/commandline/connecting-usb-devices-to-wsl/)
 
-[4] [ST-LINK, ST-LINK/V2, ST-LINK/V2-1, STLINK-V3 USB driver](https://www.st.com/en/development-tools/stsw-link009.html)
+[4] [Configurar um ambiente de desenvolvimento WSL](https://docs.microsoft.com/pt-br/windows/wsl/setup/environment)
 
-## 4 - Introdução
+## 4 - Instalação do WSL
+
+Para o Windows 10 versão 2004 e superiores o processo de instalação do WSL é
+realizado de forma automática. Para isso, abra o *Windows PowerShell* como
+administrador.
+
+![Windows PowerShell](./images/ps-administrador.jpg "Windows PowerShell")
+
+O WSL permite que você escolha, entre as opções disponíveis, a distribuição
+Linux de sua preferência. Para ver uma lista das distribuições disponíveis
+digite o comando 
+
+```console
+PS > wsl --list --online
+```
+
+![Windows PowerShell](./images/ps-distros.jpg "Windows PowerShell")
+
+Em seguida, instale a distribuição desejada usando **wsl --install -d <Distro>**.
+Neste curso será utilizada a distribuição **Ubuntu 20.04 LTS**. Caso opte por
+uma distribuição diferente será necessário adaptar as instruções fornecidas.
+
+```console
+PS > wsl --install -d Ubuntu-20.04
+```
+Quando a instalação terminar será solicitado que você escolha um nome de
+usuário e uma senha para este usuário. ATENÇÃO, **não será mostrado **
+**nenhum caractere ao digitar a senha**. É assim mesmo, digite a senha e
+pressione a tecla *ENTER*.
+
+É boa prática manter o sistema operacional atualizado. Para temos que
+atualizar a lista de pacotes, baixar e instalar as atualizações dos
+programas instalados. Para realizar esta tarefa iremos utilizar o **apt**
+(*Advanced Packaging Tool*), gerenciador de pacotes do Ubuntu.
+
+Os sistemas operacionais baseados no Unix, dos quais o Linux faz parte, têm a
+capacidade de definir de forma detalhada os direitos de acesso aos arquivos,
+dispositivos e recursos do sistema operacional. Para atualizar o sistema é
+necessário direitos de super-usuário (administrador).
+
+Para executar programas e comandos com direitos de acesso de super-usuário
+podemos utilizar o comando **sudo**, que significa *super user do!*. As linhas
+de comando a seguir atualizam a lista de pacotes e atualizam os programas
+instalados:
+
+```console
+foo@bar$ sudo apt update
+foo@bar$ sudo apt upgrade
+```
+
+O *apt* executa com direitos de acesso de super-usuário logo será solicitada
+a senha de administrador, criada logo após o a instalação do Ubuntu.
+
+Antes de iniciarmos a instalação das ferramentas necessárias para configuração
+do ambiente de desenvolvimento vamos criar um diretório para salvarmos os
+arquivos que baixarmos da internet e outro que servirá de espaço de trabalho
+para atividades de laboratório.
+
+```console
+foo@bar$ cd
+foo@bar$ mkdir Downloads
+foo@bar$ mkdir semb1-workspace
+```
+
+O comando **cd** (*Change Directory*) é utilizado para alterar o diretório
+atual. Quando utilizado sem parâmetros o diretório é alterado para a pasta
+*home* do usuário. A pasta *home* é o local onde você pode armazenar seus
+arquivos pessoais no Linux. Geralmente o diretório *home* possui o caminho
+***/home/usuario***. Você pode consultar o caminho do diretório atual
+utilizando o comando **pwd**.
+
+O comando **mkdir** (*Make Directory*) é utilizado para criar novos diretórios.
+Os comando acima criaram os diretórios ***/home/usuario/Downloads*** e 
+***/home/usuario/semb1-workspace***. Utilizaremos o diretório Downloads para
+salvar arquivos e programas baixados da internet e o diretório semb1-workspace
+para nossas atividades de laboratório.
+
+### 5.1 Acesso do sistema de arquivos do Linux no Windows Explorer
+
+Em algumas situações pode ser necessário acessar algum arquivo do Linux 
+utilizando algum aplicativo Windows ou você queira explorar o sistema de
+arquivos Linux de forma gráfica. Para as situações como a descrita podemos
+montar o sistema de arquivos do Linux como um ***drive*** de rede.
+
+Para montar o sistema de arquivos do Linux abra uma nova janela do Windows
+Explorer e digite na barra de endereços ***\\\\wsl$***. Após pressionar a
+tecla **ENTER** você terá acesso ao sistema de arquivos do Linux.
+
+![Ubuntu terminal](./images/windows-wsl-mount.jpg "Ubuntu terminal")
+
+## 5. Configuração do WSL2 para utilização de dispositivos USB
 
 O *Windows Subsytem for Linux* permite que desenvolvedores Windows executem
 binários e *scripts* em Linux diretamente no Windows. Entretanto, a ausência
@@ -36,9 +132,9 @@ interface que gravamos, depuramos o código e testamos o hardware.
 No fim de 2021 a Microsoft anunciou que adicionou suporte USB ao WSL [1]
 permitindo que todo o ciclo de desenvolvimento de um sistema embarcado seja
 realizado diretamente do WSL. As seções seguintes mostram como utilizar o WSL
-para gravar um *firmware* no kit de desenvolvimento *STM32F411 Blackpill*. 
+para gravar um *firmware* no kit de desenvolvimento *STM32F411 Blackpill*.
 
-## 5 - Instalar o USBIP no WSL2
+### 5.1. Instalação do USBIP no WSL2
 
 O suporte à dispositivos USB não é nativo no WSL, é utilizado um sistema de
 compartilhamento de dispositivos USB através de uma rede IP denominado USB/IP
@@ -89,15 +185,12 @@ foo@bar$ apt list -a linux-tools-generic
 Listing... Done
 linux-tools-generic/focal-updates,focal-security,now 5.4.0.113.117 amd64 [installed]
 linux-tools-generic/focal 5.4.0.26.32 amd64
-foo@bar$ sudo update-alternatives --install /usr/local/bin/usbip usbip \
-> /usr/lib/linux-tools/5.4.0-113-generic/usbip 20
+foo@bar$ sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/5.4.0-113-generic/usbip 20
 ```
 
-**ATENÇÃO**: O comando acima foi dividido em duas linhas para facilitar a
-visualização. Após digitar o caractere **\\** pressione a tecla ENTER. O
-terminal passará a exibir o caractere **>** para que você digite o resto do
-comando. Você também pode digitar o comando em uma única linha. Neste caso o
-terminal passará para a próxima linha automaticamente. Observe a figura abaixo.
+**ATENÇÃO**: **O comando acima funciona adequadamente para o pacote**
+**linux-tools-generic versão 5.4.0-113. Caso a versão instalada do pacote**
+**seja diferente linha de comando deverá ser modificada adequadamente.**
 
 ![Ubuntu terminal](images/lab-01-linux-tools-01.jpg "Ubuntu terminal")
 
